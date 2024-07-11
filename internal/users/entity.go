@@ -7,10 +7,23 @@ import (
 	"time"
 )
 
+var (
+	ErrorNameRequired     = errors.New("Name is required")
+	ErrorLoginRequired    = errors.New("Login is required")
+	ErrorPasswordRequired = errors.New("Password is required")
+	ErrorPasswordLength   = errors.New("Password must be have at 6 characters")
+	ErrorPasswordEmpty    = errors.New("Password can't be empty")
+)
+
 func New(name, login, password string) (*User, error) {
 	now := time.Now()
 	u := User{Name: name, Login: login, CreatedAt: now, ModifiedAt: now}
 	err := u.SetPassword(password)
+	if err != nil {
+		return nil, err
+	}
+
+	err = u.Validate()
 	if err != nil {
 		return nil, err
 	}
@@ -31,13 +44,30 @@ type User struct {
 
 func (u *User) SetPassword(password string) error {
 	if password == "" {
-		return errors.New("Password is required")
+		return ErrorPasswordRequired
 	}
 
 	if len(password) < 6 {
-		return errors.New("Password must be have at 6 characters")
+		return ErrorPasswordLength
 	}
 
 	u.Password = fmt.Sprintf("%x", md5.Sum([]byte(password)))
+	return nil
+}
+
+func (u *User) Validate() error {
+	if u.Name == "" {
+		return ErrorNameRequired
+	}
+
+	if u.Login == "" {
+		return ErrorLoginRequired
+	}
+
+	var emptyPassword = fmt.Sprintf("%x", md5.Sum([]byte("")))
+	if u.Password == emptyPassword {
+		return ErrorPasswordEmpty
+	}
+
 	return nil
 }
