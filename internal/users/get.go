@@ -28,7 +28,7 @@ func (h *handler) GetById(rw http.ResponseWriter, r *http.Request) {
 }
 
 func Get(db *sql.DB, id int64) (*User, error) {
-	stmt := `select * from "users" where id=$1`
+	stmt := `select * from "users" where id = $1`
 	row := db.QueryRow(stmt, id)
 
 	var u User
