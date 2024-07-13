@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/ramirescm/drivecar/internal/files"
 )
 
@@ -39,7 +38,7 @@ func deleteFiles(db *sql.DB, folderID int64) error {
 		return err
 	}
 
-	removedFiles := make([]file.File, 0, len(f))
+	removedFiles := make([]files.File, 0, len(f))
 	for _, file := range f {
 		file.Deleted = true
 		err = files.Update(db, file.ID, &file)
