@@ -1,10 +1,51 @@
 package users
 
 import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
 )
+
+func TestCreate(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Error(err)
+	}
+	defer db.Close()
+
+	h := handler{db}
+
+	u := User{Name: "maria", Login: "maria", Password: "123456"}
+
+	var b bytes.Buffer
+	err = json.NewEncoder(&b).Encode(&u)
+	if err != nil {
+		t.Error(err)
+	}
+
+	rr := httptest.NewRecorder() // save response when request finish
+	req := httptest.NewRequest(http.MethodPost, "/", &b)
+
+	mock.
+		ExpectExec(`insert into "users" ("name", "login", "password", "modified_at", "created_at")*`).
+		WithArgs(u.Name, u.Login, u.Password, u.ModifiedAt, u.CreatedAt).
+		WillReturnResult(sqlmock.NewResult(1, 1))
+
+	h.Create(rr, req)
+
+	if rr.Code != http.StatusCreated {
+		t.Errorf("Error: %v", rr)
+	}
+
+	err = mock.ExpectationsWereMet()
+	if err != nil {
+		t.Error(err)
+	}
+}
 
 func TestInsert(t *testing.T) {
 	db, mock, err := sqlmock.New()
