@@ -19,7 +19,7 @@ func TestCreate(t *testing.T) {
 
 	h := handler{db}
 
-	u := User{Name: "maria", Login: "maria", Password: "123456"}
+	u := User{Name: "Gooper", Login: "gooper@go.com.br", Password: "123456"}
 
 	var b bytes.Buffer
 	err = json.NewEncoder(&b).Encode(&u)
@@ -32,7 +32,7 @@ func TestCreate(t *testing.T) {
 
 	mock.
 		ExpectExec(`insert into "users" ("name", "login", "password", "modified_at", "created_at")*`).
-		WithArgs(u.Name, u.Login, u.Password, u.ModifiedAt, u.CreatedAt).
+		WithArgs(u.Name, u.Login, AnyPassword{}, u.ModifiedAt, u.CreatedAt).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	h.Create(rr, req)
