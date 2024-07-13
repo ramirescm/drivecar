@@ -14,3 +14,9 @@ psql -h imersao-postgres -U postgres
 # psql -h imersao-postgres -U postgres // conect cotainer
 # \c imersao // conect db
 # \dt // list tables
+
+Run tests
+
+### Users go test ./internal/users... -v
+### Folders go test ./internal/folders... -v
+### Files go test ./internal/files... -v
