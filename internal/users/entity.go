@@ -42,6 +42,10 @@ type User struct {
 	LastLogin  time.Time `json:"last_login"`
 }
 
+func encPassword(password string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(password)))
+}
+
 func (u *User) SetPassword(password string) error {
 	if password == "" {
 		return ErrorPasswordRequired
@@ -51,7 +55,7 @@ func (u *User) SetPassword(password string) error {
 		return ErrorPasswordLength
 	}
 
-	u.Password = fmt.Sprintf("%x", md5.Sum([]byte(password)))
+	u.Password = encPassword(password)
 	return nil
 }
 

@@ -20,3 +20,9 @@ Run tests
 ### Users go test ./internal/users... -v
 ### Folders go test ./internal/folders... -v
 ### Files go test ./internal/files... -v
+
+
+#
+go test -cover ./internal/... -v
+go test -coverprofile=coverage.out ./internal/... -v
+go tool cover  -html=coverage.out
