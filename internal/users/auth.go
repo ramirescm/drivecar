@@ -18,7 +18,7 @@ func (h *handler) authenticate(login, password string) (*User, error) {
 func (h *handler) updateLastLogin(u *User) error {
 	u.LastLogin = time.Now()
 
-	Update(h.db, u.ID, u)
+	return Update(h.db, u.ID, u)
 }
 
 func Authenticate(login, password string) (u *User, err error) {

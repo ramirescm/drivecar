@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/ramirescm/drivecar/internal/users"
 )
 
 var jwtSecret = "ererfsfs"
@@ -17,12 +16,12 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func createToken(user *users.User) (string, error) {
+func createToken(authenticated Authenticated) (string, error) {
 	expirationTime := time.Now().Add(30 * time.Minute)
 
 	claims := &Claims{
-		UserID:   user.ID,
-		Username: user.Name,
+		UserID:   authenticated.GetID(),
+		Username: authenticated.GetName(),
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
@@ -38,7 +37,7 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-func Auth(rw http.ResponseWriter, r *http.Request) {
+func (h *handler) auth(rw http.ResponseWriter, r *http.Request) {
 	var cred Credentials
 
 	err := json.NewDecoder(r.Body).Decode(&cred)
@@ -47,7 +46,7 @@ func Auth(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := users.Authenticate(cred.Username, cred.Password)
+	u, err := h.authenticate(cred.Username, cred.Password)
 	if err != nil {
 		http.Error(rw, err.Error(), http.StatusUnauthorized)
 		return

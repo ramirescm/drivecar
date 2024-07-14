@@ -42,6 +42,14 @@ type User struct {
 	LastLogin  time.Time `json:"last_login"`
 }
 
+func (u *User) GetID() int64 {
+	return u.ID
+}
+
+func (u *User) GetName() string {
+	return u.Name
+}
+
 func encPassword(password string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(password)))
 }
