@@ -42,6 +42,7 @@ func (h *handler) Modify(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rw.WriteHeader(http.StatusOK)
 	rw.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(rw).Encode(u)
 }

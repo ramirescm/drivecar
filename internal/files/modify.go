@@ -30,9 +30,8 @@ func (h *handler) Modify(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = file.Validate()
-	if err != nil {
-		http.Error(rw, err.Error(), http.StatusBadRequest)
+	if file.Name == "" {
+		http.Error(rw, ErrorNameRequired.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -42,6 +41,7 @@ func (h *handler) Modify(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rw.WriteHeader(http.StatusOK)
 	rw.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(rw).Encode(file)
 }
@@ -50,7 +50,7 @@ func Update(db *sql.DB, id int64, f *File) error {
 	f.ModifiedAt = time.Now()
 
 	stmt := `update "files" set "name" = $1, "modified_at" = $2, "deleted" = $3 where id = $4`
-	_, err := db.Exec(stmt, f.Name, f.Deleted, id)
+	_, err := db.Exec(stmt, f.Name, f.ModifiedAt, f.Deleted, id)
 
 	return err
 }

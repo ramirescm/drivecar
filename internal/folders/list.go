@@ -17,6 +17,7 @@ func (h *handler) GetAll(rw http.ResponseWriter, r *http.Request) {
 
 	fc := FolderContent{Folder: Folder{Name: "root"}, Content: c}
 
+	rw.WriteHeader(http.StatusOK)
 	rw.Header().Add("Content-Type", "application/json")
 	json.NewEncoder(rw).Encode(fc)
 }

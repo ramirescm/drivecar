@@ -67,6 +67,7 @@ func (h *handler) Create(rw http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	rw.WriteHeader(http.StatusCreated)
 	rw.Header().Add("Contenty-Type", "application/json")
 	json.NewEncoder(rw).Encode(entity)
 }
