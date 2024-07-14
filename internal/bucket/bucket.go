@@ -9,11 +9,14 @@ import (
 
 const (
 	AwsProvider BucketType = iota
+	MockProvider
 )
 
 type BucketType int
 
 func New(bt BucketType, cfg any) (b *Bucket, err error) {
+	b = new(Bucket)
+
 	rt := reflect.TypeOf(cfg)
 
 	switch bt {
@@ -23,6 +26,10 @@ func New(bt BucketType, cfg any) (b *Bucket, err error) {
 		}
 
 		b.p = newAwsSession(cfg.(AwsConfig))
+	case MockProvider:
+		b.p = &MockBucket{
+			content: make(map[string][]byte),
+		}
 	default:
 		return nil, fmt.Errorf("type not implemented")
 	}

@@ -8,11 +8,14 @@ import (
 
 const (
 	RabbitMQ QueueType = iota
+	MockProvider
 )
 
 type QueueType int
 
 func New(qt QueueType, cfg any) (q *Queue, err error) {
+	q = new(Queue)
+
 	rt := reflect.TypeOf(cfg)
 
 	switch qt {
@@ -27,6 +30,10 @@ func New(qt QueueType, cfg any) (q *Queue, err error) {
 		}
 
 		q.qc = conn
+	case MockProvider:
+		q.qc = &MockQueue{
+			q: make([]*QueueDto, 0),
+		}
 	default:
 		log.Fatal("type not implemented")
 	}

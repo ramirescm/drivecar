@@ -2,12 +2,16 @@ package files
 
 import (
 	"bytes"
-	"encoding/json"
+	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/ramirescm/drivecar/internal/bucket"
+	"github.com/ramirescm/drivecar/internal/queue"
 )
 
 func TestCreate(t *testing.T) {
@@ -17,18 +21,46 @@ func TestCreate(t *testing.T) {
 	}
 	defer db.Close()
 
-	h := handler{db, nil, nil}
-
-	f := File{Name: "Gooper"}
-
-	var b bytes.Buffer
-	err = json.NewEncoder(&b).Encode(&f)
+	b, err := bucket.New(bucket.MockProvider, nil)
 	if err != nil {
 		t.Error(err)
 	}
 
+	q, err := queue.New(queue.MockProvider, nil)
+	if err != nil {
+		t.Error(err)
+	}
+
+	h := handler{db, b, q}
+
+	// upload
+	body := new(bytes.Buffer)
+	mw := multipart.NewWriter(body)
+	file, err := os.Open("./testdata/test.jpg")
+	if err != nil {
+		t.Error(err)
+	}
+
+	w, err := mw.CreateFormFile("file", "test.jpg")
+	if err != nil {
+		t.Error(err)
+	}
+
+	_, err = io.Copy(w, file)
+	if err != nil {
+		t.Error(err)
+	}
+	mw.Close()
+	// end upload
+
 	rr := httptest.NewRecorder() // save response when request finish
-	req := httptest.NewRequest(http.MethodPost, "/", &b)
+	req := httptest.NewRequest(http.MethodPost, "/", body)
+	req.Header.Add("Content-Type", mw.FormDataContentType())
+
+	mock.
+		ExpectExec(`insert into "files" ("folder_id", "owner_id", "name", "type", "path", "modified_at")*`).
+		WithArgs(0, 1, "test.jpg", "application/octet-stream", "/test.jpg", AnyTime{}).
+		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	h.Create(rr, req)
 
