@@ -12,8 +12,8 @@ func Validate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		tokenString := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 
-		clamis := new(Claims)
-		token, err := jwt.ParseWithClaims(tokenString, clamis, func(t *jwt.Token) (interface{}, error) {
+		claims := new(Claims)
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 			return jwtSecret, nil
 		})
 
@@ -32,8 +32,8 @@ func Validate(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), "user_id", clamis.UserID)
-		ctx = context.WithValue(ctx, "user_name", clamis.Username)
+		ctx := context.WithValue(r.Context(), "user_id", claims.UserID)
+		ctx = context.WithValue(ctx, "user_name", claims.Username)
 
 		next.ServeHTTP(rw, r.WithContext(ctx))
 	})
